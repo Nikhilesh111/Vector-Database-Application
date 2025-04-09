@@ -13,20 +13,22 @@ model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 text_generator = pipeline("text-generation", model="gpt2-large")
 
 # Function to generate useful sentences based on query
-def generate_sentences(query, num_sentences=20):
-    # generated = text_generator(query, max_length=50, num_return_sequences=num_sentences)
-    generated = text_generator(query, max_length=70, num_return_sequences=5, do_sample=True, top_k=50, top_p=0.95, temperature=0.8)
+def generate_sentences(query, num_sentences=5):
+    generated = text_generator(query, max_length=70, num_return_sequences=num_sentences, do_sample=True, top_k=50, top_p=0.95, temperature=0.8)
 
     sentences = [text["generated_text"].strip() for text in generated]
+
     
     # Filter out incomplete or too short sentences
     sentences = [s for s in sentences if len(s.split()) > 5]
     return sentences
 
-
 @app.route("/", methods=["GET", "POST"])
 def search_page():
     results = []
+    
+    if request.method == "GET":
+        return render_template("index.html", results=[])
     
     if request.method == "POST":
         query = request.form["query"]
